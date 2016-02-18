@@ -139,6 +139,26 @@ service_status() {
   echo "stopped" && return 0
 }
 
+service_port_pause() {
+  local SERVICE="$1"
+  local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
+  local EXPOSED_NAME="$(get_service_name "$SERVICE").ambassador"
+  local PORT_FILE="$SERVICE_ROOT/PORT"
+  local LOG_FAIL="$2"
+
+  if [[ "$LOG_FAIL" == "true" ]]; then
+    [[ ! -f "$PORT_FILE" ]] && dokku_log_fail "Service not exposed"
+  else
+    [[ ! -f "$PORT_FILE" ]] && return 0
+  fi
+
+  docker stop "$EXPOSED_NAME" > /dev/null
+  docker rm "$EXPOSED_NAME" > /dev/null
+  if [[ "$LOG_FAIL" == "true" ]]; then
+    dokku_log_info1 "Service $SERVICE unexposed"
+  fi
+}
+
 service_start() {
   local SERVICE="$1"
   local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
