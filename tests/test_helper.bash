@@ -3,13 +3,13 @@ export DOKKU_QUIET_OUTPUT=1
 export DOKKU_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/dokku"
 export DOKKU_VERSION=${DOKKU_VERSION:-"master"}
 export PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/bin:$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/dokku:$PATH"
-export PLUGIN_COMMAND_PREFIX="sns"
+export PLUGIN_COMMAND_PREFIX="sqs"
 export PLUGIN_PATH="$DOKKU_ROOT/plugins"
 export PLUGIN_ENABLED_PATH="$PLUGIN_PATH"
 export PLUGIN_AVAILABLE_PATH="$PLUGIN_PATH"
 export PLUGIN_CORE_AVAILABLE_PATH="$PLUGIN_PATH"
-export ELASTICSEARCH_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/fixtures"
-export PLUGIN_DATA_ROOT="$ELASTICSEARCH_ROOT"
+export ELASTICMQ_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/fixtures"
+export PLUGIN_DATA_ROOT="$ELASTICMQ_ROOT"
 export PLUGN_URL="https://github.com/dokku/plugn/releases/download/v0.2.1/plugn_0.2.1_linux_x86_64.tgz"
 
 mkdir -p "$PLUGIN_DATA_ROOT"

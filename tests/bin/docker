@@ -40,10 +40,19 @@ case "$1" in
       echo "5e50a462661e        rabbitmq:3.5.4-management  \"/docker-entrypoint.   11 seconds ago       Up 10 seconds       5672/tcp, 15672/tcp              dokku.rabbitmq.l"
       echo "c39ca00fa3c6        redis:3.0.3                \"/entrypoint.sh redi   11 seconds ago       Up 10 seconds       6379/tcp                         dokku.redis.l"
       echo "dc98c2939a80        rethinkdb:2.1.1            \"rethinkdb --bind al   11 seconds ago       Up 10 seconds       8080/tcp, 28015/tcp, 29015/tcp   dokku.rethinkdb.l"
+      echo "f415e64181f7        seayou/elasticmq:latest    \"tini -- /bin/sh -c    5 weeks ago          Up 5 weeks          9324/tcp                         dokku.sqs.l"
     fi
     ;;
   exec)
-    echo "exec called with $@"
+    if [[ $@ = *"sqs list-queues --output text | cut -d/ -f5 | egrep ^m$"* ]]; then
+      echo "http://dokku-sqs-m:9324/queue/m"
+      exit 0
+    elif [[ $@ = *"sqs list-queues --output text | cut -d/ -f5 | egrep ^l$"* ]]; then
+      echo ""
+      exit 0
+    else
+      echo "exec called with $@"
+    fi
     ;;
   inspect)
     if [[ $@ = *"IPAddress"* ]]; then
@@ -80,6 +89,7 @@ case "$1" in
     echo "redis                     3.0.3               9216d5a4eec8        13 days ago         109.3 MB"
     echo "rethinkdb                 2.1.1               f27010a550ec        13 days ago         196.3 MB"
     echo "svendowideit/ambassador   latest              0d2200edc53e        21 months ago       7.241 MB"
+    echo "seayou/elasticmq          latest              a03dbd5617a1        7 days ago          231 MB"
     ;;
   pull)
     exit 0

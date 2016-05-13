@@ -106,7 +106,7 @@ case "$1" in
     [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
     [[ -z $3 ]] && dokku_log_fail "Please specify an SQS queue name"
     verify_service_name "$2"
-    verify_queue_name "$2" "$3"
+    verify_queue_add_name "$2" "$3"
     SERVICE="$2"; QUEUE_NAME="$3"
     SERVICE_NAME="$(get_service_name "$SERVICE")"
     AWS_CONFIG="AWS_ACCESS_KEY_ID=fake AWS_SECRET_ACCESS_KEY=fake AWS_DEFAULT_REGION=fake"
@@ -120,7 +120,7 @@ case "$1" in
     [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
     [[ -z $3 ]] && dokku_log_fail "Please specify an SQS queue name"
     verify_service_name "$2"
-    verify_queue_name "$2" "$3"
+    verify_queue_remove_name "$2" "$3"
     SERVICE="$2"; QUEUE_NAME="$3"
     SERVICE_NAME="$(get_service_name "$SERVICE")"
     AWS_CONFIG="AWS_ACCESS_KEY_ID=fake AWS_SECRET_ACCESS_KEY=fake AWS_DEFAULT_REGION=fake"
@@ -141,6 +141,18 @@ case "$1" in
     QUEUE_LIST=$(docker exec "$SERVICE_NAME" /usr/bin/env sh -c "$AWS_CONFIG aws --endpoint-url http://localhost:9324 sqs list-queues --output text | cut -c11-")
     echo "${QUEUE_LIST//http:\/\/localhost:9324/${SERVICE_URL}}"
     [[ -n $SSH_TTY ]] && stty opost
+    ;;
+
+  $PLUGIN_COMMAND_PREFIX:expose)
+    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
+    verify_service_name "$2"
+    service_port_expose "$2" "${@:3}"
+    ;;
+
+  $PLUGIN_COMMAND_PREFIX:unexpose)
+    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
+    verify_service_name "$2"
+    service_port_unexpose "$2"
     ;;
 
   $PLUGIN_COMMAND_PREFIX:logs)
@@ -208,6 +220,8 @@ case "$1" in
     $PLUGIN_COMMAND_PREFIX:restart <name>, Graceful shutdown and restart of the $PLUGIN_SERVICE service container
     $PLUGIN_COMMAND_PREFIX:info <name>, Print the connection information
     $PLUGIN_COMMAND_PREFIX:list, List all $PLUGIN_SERVICE services
+    $PLUGIN_COMMAND_PREFIX:expose <name> [port], Expose a $PLUGIN_SERVICE service on custom port if provided (random port otherwise)
+    $PLUGIN_COMMAND_PREFIX:unexpose <name>, Unexpose a previously exposed $PLUGIN_SERVICE service
     $PLUGIN_COMMAND_PREFIX:start <name>, Start a previously stopped $PLUGIN_SERVICE service
     $PLUGIN_COMMAND_PREFIX:stop <name>, Stop a running $PLUGIN_SERVICE service
     $PLUGIN_COMMAND_PREFIX:promote <name> <app>, Promote service <name> as ${PLUGIN_DEFAULT_ALIAS}_URL in <app>

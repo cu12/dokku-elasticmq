@@ -22,18 +22,23 @@ dokku plugin:install https://github.com/cu12/dokku-elasticmq.git elasticmq
 ## commands
 
 ```
-sqs:queue:add <name> <queue>    Creates an sqs queue
 sqs:create <name>               Create a sqs service with environment variables
 sqs:destroy <name>              Delete the service and stop its container if there are no links left
+sqs:expose <name> [port]        Expose an sqs service on custom port if provided (random port otherwise)
 sqs:info <name>                 Print the connection information
 sqs:link <name> <app>           Link the sqs service to the app
 sqs:list                        List all sqs services
-sqs:topics <name>               List all sqs queues for this service
 sqs:logs <name> [-t]            Print the most recent log(s) for this service
+sqs:promote <name> <app>        Promote service <name> as SQS_URL in <app>
+sqs:queue:add <name> <queue>    Creates an sqs queue
 sqs:queue:remove <name> <queue> Removes an sqs queue
+sqs:queue:list <name> <queue>   List all sqs queues for this service
 sqs:restart <name>              Graceful shutdown and restart of the sqs service container
 sqs:start <name>                Start a previously stopped sqsq service
 sqs:stop <name>                 Stop a running sqs service
+sqs:unexpose <name>             Unexpose a previously exposed sqs service
+sqs:unlink <name> <app>         Unlink the sqs service from the app
+
 ```
 
 ## usage
@@ -65,16 +70,16 @@ dokku sqs:link lolipop playground
 
 The following will be set on the linked application by default
 #
-#   SQS_URL=http://dokku-sqs-lolipop:9200
+#   SQS_URL=http://dokku-sqs-lolipop:9324
 #
 
 # another service can be linked to your app
 dokku sqs:link other_service playground
 
-# since sqs_URL is already in use, another environment variable will be
+# since SQS_URL is already in use, another environment variable will be
 # generated automatically
 #
-#   DOKKU_SQS_BLUE_URL=http://dokku-sns-other-service:9200
+#   DOKKU_ELASTICMQ_BLUE_URL=http://dokku-sqs-other-service:9324
 
 # you can then promote the new service to be the primary one
 # NOTE: this will restart your app
@@ -84,9 +89,18 @@ dokku sqs:promote other_service playground
 # another environment variable to hold the previous value if necessary.
 # you could end up with the following for example:
 #
-#   SQS_URL=http://dokku-sqs-other-service:9200
-#   DOKKU_SQS_BLUE_URL=http://dokku-sqs-other-service:9200
-#   DOKKU_SQS_SILVER_URL=http://dokku-sqs-lolipop:9200
+#   SQS_URL=http://dokku-sqs-other-service:9324
+#   DOKKU_ELASTICMQ_BLUE_URL=http://dokku-sqs-other-service:9324
+#   DOKKU_ELASTICMQ_SILVER_URL=http://dokku-sqs-lolipop:9324
+
+# you can create SQS queues
+dokku sqs:queue:add lolipop queue
+
+# also list them
+dokku sqs:queue:list lolipop
+
+# and of course remove them
+dokku sqs:queue:remove lolipop queue
 
 # you can also unlink an sqs service
 # NOTE: this will restart your app and unset related environment variables
